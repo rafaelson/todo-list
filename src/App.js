@@ -32,98 +32,86 @@ import React, { Fragment, useState } from "react";
 
 const drawerWidth = "240px";
 
-class CardInfo extends React.Component {
-  render() {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          minWidth: "100%",
-        }}
-      >
-        <Chip
-          icon={<AccessTime />}
-          label={"04 jun, 9:30"}
-          size="small"
-          variant="outlined"
-          sx={{ marginBottom: 1, marginLeft: 1 }}
-        />
-        <IconButton sx={{ p: 0, marginBottom: 1, marginRight: 1 }}>
-          <MoreVert />
-        </IconButton>
-      </Box>
-    );
-  }
+function CardInfo() {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        minWidth: "100%",
+      }}
+    >
+      <Chip
+        icon={<AccessTime />}
+        label={"04 jun, 9:30"}
+        size="small"
+        variant="outlined"
+        sx={{ marginBottom: 1, marginLeft: 1 }}
+      />
+      <IconButton sx={{ p: 0, marginBottom: 1, marginRight: 1 }}>
+        <MoreVert />
+      </IconButton>
+    </Box>
+  );
 }
 
-class CardContentContainer extends React.Component {
-  render() {
-    return (
-      <Fragment>
-        <CardContent>
-          <FormGroup>
-            <FormControlLabel
-              control={<Checkbox defaultChecked />}
-              label="Label"
-            />
-            <FormControlLabel
-              disabled
-              control={<Checkbox />}
-              label="Disabled"
-            />
-          </FormGroup>
-          {/* <Typography>
+function CardContentContainer() {
+  return (
+    <Fragment>
+      <CardContent>
+        <FormGroup>
+          <FormControlLabel
+            control={<Checkbox defaultChecked />}
+            label="Label"
+          />
+          <FormControlLabel disabled control={<Checkbox />} label="Disabled" />
+        </FormGroup>
+        {/* <Typography>
             Lorem ipsum dolor, sit amet consectetur adipisicing elit. Corrupti,
             tempora.
           </Typography> */}
-        </CardContent>
-        <CardActions sx={{ justifyContent: "flex-end" }}>
-          <IconButton>
-            <Add />
-          </IconButton>
-        </CardActions>
-        <CardInfo />
-      </Fragment>
-    );
-  }
+      </CardContent>
+      <CardActions sx={{ justifyContent: "flex-end" }}>
+        <IconButton>
+          <Add />
+        </IconButton>
+      </CardActions>
+      <CardInfo />
+    </Fragment>
+  );
 }
 
-class GenericCard extends React.Component {
-  render() {
-    return (
-      <Card
-        variant="outlined"
-        sx={{
-          minWidth: 230,
-          maxWidth: 280,
-          minHeight: 300,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-        }}
-      >
-        <CardContentContainer />
-      </Card>
-    );
-  }
+function GenericCard() {
+  return (
+    <Card
+      variant="outlined"
+      sx={{
+        minWidth: 230,
+        maxWidth: 280,
+        minHeight: 300,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+      }}
+    >
+      <CardContentContainer />
+    </Card>
+  );
 }
 
-class HeaderBar extends React.Component {
-  render() {
-    return (
-      <AppBar sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar variant="dense" sx={{ justifyContent: "space-between" }}>
-          <Typography variant="h5">ToDo App</Typography>
-          <IconButton>
-            <Add />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-    );
-  }
+function HeaderBar() {
+  return (
+    <AppBar sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <Toolbar variant="dense" sx={{ justifyContent: "space-between" }}>
+        <Typography variant="h5">ToDo App</Typography>
+        <IconButton>
+          <Add />
+        </IconButton>
+      </Toolbar>
+    </AppBar>
+  );
 }
 
 function AddProjectForm(props) {
@@ -186,87 +174,75 @@ function AddProjectButton(props) {
   );
 }
 
-class Project extends React.Component {
-  render() {
-    return (
-      <ListItem>
-        <ListItemButton>
-          <ListItemText primary={this.props.name} />
-        </ListItemButton>
-      </ListItem>
-    );
-  }
+function Project(props) {
+  return (
+    <ListItem>
+      <ListItemButton>
+        <ListItemText primary={props.name} />
+      </ListItemButton>
+    </ListItem>
+  );
 }
 
-class ProjectList extends React.Component {
-  renderProjects() {
-    let projectelements = this.props.projects.map((project, index) => {
+function ProjectList(props) {
+  const renderProjects = () => {
+    let projectelements = props.projects.map((project, index) => {
       return <Project name={project.name} key={index} />;
     });
     return projectelements;
-  }
-  render() {
-    return (
-      <List>
-        {this.renderProjects()}
-        <AddProjectButton addProject={this.props.addProject} />
-      </List>
-    );
-  }
+  };
+
+  return (
+    <List>
+      {renderProjects()}
+      <AddProjectButton addProject={props.addProject} />
+    </List>
+  );
 }
 
-class ProjectDrawer extends React.Component {
-  render() {
-    return (
-      <Drawer
-        variant="permanent"
-        sx={{
+function ProjectDrawer(props) {
+  return (
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        [`& .MuiDrawer-paper`]: {
           width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
-          <ProjectList
-            projects={this.props.projects}
-            addProject={this.props.addProject}
-          />
-        </Box>
-      </Drawer>
-    );
-  }
+          boxSizing: "border-box",
+        },
+      }}
+    >
+      <Toolbar />
+      <Box sx={{ overflow: "auto" }}>
+        <ProjectList projects={props.projects} addProject={props.addProject} />
+      </Box>
+    </Drawer>
+  );
 }
 
-class CardContainer extends React.Component {
-  render() {
-    return (
-      <Box
-        sx={{
-          display: "grid",
-          gap: 5,
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 250px))",
-        }}
-      >
-        <GenericCard />
-        <GenericCard />
-      </Box>
-    );
-  }
+function CardContainer() {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gap: 5,
+        gridTemplateColumns: "repeat(auto-fit, minmax(150px, 250px))",
+      }}
+    >
+      <GenericCard />
+      <GenericCard />
+    </Box>
+  );
 }
 
-class ProjectContainer extends React.Component {
-  render() {
-    return (
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Toolbar />
-        <CardContainer />
-      </Box>
-    );
-  }
+function ProjectContainer() {
+  return (
+    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Toolbar />
+      <CardContainer />
+    </Box>
+  );
 }
 
 class AppContainer extends React.Component {
