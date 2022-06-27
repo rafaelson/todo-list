@@ -1,5 +1,4 @@
 import logo from "./logo.svg";
-import "./App.css";
 import {
   Drawer,
   Divider,
@@ -25,10 +24,22 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
+  ToggleButtonGroup,
+  ToggleButton,
+  Menu,
+  MenuItem,
+  Fade,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { Add, Delete, AccessTime, MoreVert } from "@mui/icons-material";
-import React, { Fragment, useState } from "react";
+import {
+  Add,
+  Delete,
+  AccessTime,
+  MoreVert,
+  DriveFileRenameOutline,
+} from "@mui/icons-material";
+import React, { Fragment, useState, useEffect } from "react";
+import { cloneDeep } from "lodash";
 
 const drawerWidth = "240px";
 
@@ -137,10 +148,44 @@ function AddProjectForm(props) {
         <Button
           onClick={() => {
             props.handleClose();
-            props.addProject(name);
+            props.project.add(name);
+            setName("");
           }}
         >
           Create
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function RenameProjectForm(props) {
+  const [name, setName] = useState("");
+  return (
+    <Dialog open={props.open} onClose={props.handleClose}>
+      <DialogTitle>Rename project</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="project name"
+          label="Project name"
+          type="text"
+          fullWidth
+          variant="standard"
+          onChange={(e) => setName(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={props.handleClose}>Cancel</Button>
+        <Button
+          onClick={() => {
+            props.handleClose();
+            props.project.rename(props.id, name);
+            setName("");
+          }}
+        >
+          Rename
         </Button>
       </DialogActions>
     </Dialog>
@@ -168,35 +213,132 @@ function AddProjectButton(props) {
       <AddProjectForm
         open={open}
         handleClose={handleClose}
-        addProject={props.addProject}
+        project={props.project}
       />
     </Fragment>
   );
 }
 
-function Project(props) {
+function ProjectOptionsMenu(props) {
+  const [open, setOpen] = useState(false);
+  const [id, setID] = useState(null);
+
+  const handleFormOpen = () => {
+    setOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setOpen(false);
+  };
+
   return (
-    <ListItem>
-      <ListItemButton>
-        <ListItemText primary={props.name} />
-      </ListItemButton>
-    </ListItem>
+    <Fragment>
+      <Menu
+        id="project-options-menu"
+        MenuListProps={{
+          "aria-labelledby": "project-options-menu-button",
+        }}
+        anchorEl={props.anchorEl}
+        open={props.open}
+        onClose={props.handleClose}
+      >
+        <MenuItem
+          onClick={() => {
+            setID(props.anchorEl.id);
+            handleFormOpen();
+            props.handleClose();
+          }}
+        >
+          <DriveFileRenameOutline /> Rename
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            props.project.delete(props.anchorEl.id);
+            props.handleClose();
+          }}
+        >
+          <Delete /> Delete
+        </MenuItem>
+      </Menu>
+      <RenameProjectForm
+        open={open}
+        handleClose={handleFormClose}
+        project={props.project}
+        id={id}
+      />
+    </Fragment>
   );
 }
 
 function ProjectList(props) {
+  const [view, setView] = useState(0);
+  const [anchorEl, setAnchorEl] = useState(false);
+  const open = Boolean(anchorEl);
+
+  // Keep selected project between reloads
+  useEffect(() => {
+    if (view !== props.project.current) {
+      setView(props.project.current);
+    }
+  }, [props.project, view]);
+
+  const mouseDown = (e) => {
+    e.stopPropagation();
+    handleClick(e);
+  };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleChange = (event, change) => {
+    if (change != null) {
+      setView(change);
+      props.project.setCurrent(event.target.value);
+    }
+  };
+
   const renderProjects = () => {
-    let projectelements = props.projects.map((project, index) => {
-      return <Project name={project.name} key={index} />;
+    let projectElements = props.project.list.map((project, index) => {
+      return (
+        <ToggleButton
+          value={index}
+          key={index}
+          sx={{ justifyContent: "space-between" }}
+        >
+          {project.name}
+          <IconButton id={index} onClick={mouseDown}>
+            <MoreVert />
+          </IconButton>
+        </ToggleButton>
+      );
     });
-    return projectelements;
+    return projectElements;
   };
 
   return (
-    <List>
-      {renderProjects()}
-      <AddProjectButton addProject={props.addProject} />
-    </List>
+    <Fragment>
+      <ToggleButtonGroup
+        orientation="vertical"
+        value={view}
+        exclusive
+        onChange={handleChange}
+        fullWidth={true}
+      >
+        {renderProjects()}
+      </ToggleButtonGroup>
+      <AddProjectButton project={props.project} />
+      <ProjectOptionsMenu
+        anchorEl={anchorEl}
+        open={open}
+        handleClose={handleClose}
+        project={props.project}
+      />
+    </Fragment>
   );
 }
 
@@ -215,7 +357,7 @@ function ProjectDrawer(props) {
     >
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
-        <ProjectList projects={props.projects} addProject={props.addProject} />
+        <ProjectList project={props.project} />
       </Box>
     </Drawer>
   );
@@ -236,11 +378,11 @@ function CardContainer() {
   );
 }
 
-function ProjectContainer() {
+function ProjectContainer(props) {
   return (
     <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
       <Toolbar />
-      <CardContainer />
+      <CardContainer project={props.project} />
     </Box>
   );
 }
@@ -250,25 +392,31 @@ class AppContainer extends React.Component {
     super(props);
     this.state = {
       projects: [],
+      currentProject: 0,
     };
   }
 
   componentDidMount() {
     const storage = JSON.parse(localStorage.getItem("projects"));
+    const current = Number(localStorage.getItem("current"));
     if (storage) {
       this.setState({ projects: storage });
     } else {
       this.setState(this.addProject("Default project"));
     }
+    if (current) {
+      this.setState({ currentProject: current });
+    }
   }
 
   componentDidUpdate() {
     localStorage.setItem("projects", JSON.stringify(this.state.projects));
+    localStorage.setItem("current", this.state.currentProject);
   }
 
   addProject(name) {
     if (name === "") {
-      name = `New project ${this.state.projects.length}`;
+      name = `New project ${this.state.projects.length + 1}`;
     }
     let newState = this.state.projects.concat({
       name: name,
@@ -278,15 +426,41 @@ class AppContainer extends React.Component {
     this.setState({ projects: newState });
   }
 
+  renameProject(id, name) {
+    let newState = cloneDeep(this.state.projects);
+    newState[id].name = name;
+    this.setState({ projects: newState });
+  }
+
+  deleteProject(id) {
+    let newState = cloneDeep(this.state.projects);
+    newState.splice(id, 1);
+    this.setState({ projects: newState });
+    if (this.state.currentProject > 0 && id == this.state.currentProject) {
+      this.setState({ currentProject: this.state.currentProject - 1 });
+    }
+  }
+
   render() {
     return (
       <Box sx={{ display: "flex", flexDirection: "row" }}>
         <HeaderBar />
         <ProjectDrawer
-          projects={this.state.projects}
-          addProject={(name) => this.addProject(name)}
+          project={{
+            add: (name) => this.addProject(name),
+            rename: (id, name) => this.renameProject(id, name),
+            delete: (id) => this.deleteProject(id),
+            setCurrent: (id) => this.setState({ currentProject: Number(id) }),
+            current: this.state.currentProject,
+            list: this.state.projects,
+          }}
         />
-        <ProjectContainer />
+        <ProjectContainer
+          project={{
+            list: this.state.projects,
+            current: this.state.currentProject,
+          }}
+        />
       </Box>
     );
   }
