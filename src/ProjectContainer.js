@@ -8,10 +8,22 @@ import {
   Checkbox,
   CardActions,
   Toolbar,
+  Typography,
+  TextField,
+  Input,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { Fragment } from "react";
-import { AccessTime, MoreVert, Add } from "@mui/icons-material";
+import {
+  AccessTime,
+  MoreVert,
+  Add,
+  DriveFileRenameOutline,
+  Delete,
+} from "@mui/icons-material";
+import { useState } from "react";
 
 function CardInfo() {
   return (
@@ -37,33 +49,151 @@ function CardInfo() {
   );
 }
 
-function CardContentContainer() {
+function ProjectOptionsMenu(props) {
+  const [open, setOpen] = useState(false);
+  const [id, setID] = useState(null);
+
+  const handleFormOpen = () => {
+    setOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setOpen(false);
+  };
+
   return (
     <Fragment>
-      <CardContent>
-        <FormGroup>
-          <FormControlLabel
-            control={<Checkbox defaultChecked />}
-            label="Label"
+      <Menu
+        id="project-options-menu"
+        MenuListProps={{
+          "aria-labelledby": "project-options-menu-button",
+        }}
+        anchorEl={props.anchorEl}
+        open={props.open}
+        onClose={props.handleClose}
+      >
+        <MenuItem
+          onClick={() => {
+            setID(props.anchorEl.id);
+            handleFormOpen();
+            props.handleClose();
+          }}
+        >
+          <DriveFileRenameOutline /> Change
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            props.project.delete(props.anchorEl.id);
+            props.handleClose();
+          }}
+        >
+          <Delete /> Delete
+        </MenuItem>
+      </Menu>
+    </Fragment>
+  );
+}
+
+function CardContentContainer(props) {
+  const [anchorEl, setAnchorEl] = useState(false);
+  const open = Boolean(anchorEl);
+
+  const mouseDown = (e) => {
+    // e.stopPropagation();
+    handleClick(e);
+    console.log(e.currentTarget);
+  };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleChangeNote = (e) => {
+    props.project.updateCard(
+      props.project.current,
+      props.id,
+      e.target.value,
+      "note"
+    );
+  };
+
+  const handleChangeCheckbox = (e) => {
+    props.project.updateCard(
+      props.project.current,
+      props.id,
+      e.target.value,
+      "checklist",
+      Number(e.target.id)
+    );
+  };
+
+  const addCheckBox = () => {
+    let content = { label: undefined, checked: false };
+    props.project.updateCard(
+      props.project.current,
+      props.id,
+      content,
+      "checklist"
+    );
+  };
+
+  const generateContent = () => {
+    if (props.type === "note") {
+      return (
+        <Typography>
+          <Input
+            multiline
+            disableUnderline
+            value={props.content}
+            placeholder="Insert a note"
+            onChange={handleChangeNote}
           />
-          <FormControlLabel disabled control={<Checkbox />} label="Disabled" />
+        </Typography>
+      );
+    } else {
+      let listItems = props.content.map((cntnt, index) => {
+        return (
+          <FormControlLabel
+            control={<Checkbox checked={Boolean(cntnt.checked)} />}
+            label={
+              <Input
+                multiline
+                disableUnderline
+                value={cntnt.label}
+                onChange={handleChangeCheckbox}
+                id={index}
+              />
+            }
+          />
+        );
+      });
+
+      return (
+        <FormGroup>
+          {listItems}
+          <CardActions sx={{ justifyContent: "flex-end" }}>
+            <IconButton onClick={addCheckBox}>
+              <Add />
+            </IconButton>
+          </CardActions>
         </FormGroup>
-        {/* <Typography>
-              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Corrupti,
-              tempora.
-            </Typography> */}
-      </CardContent>
-      <CardActions sx={{ justifyContent: "flex-end" }}>
-        <IconButton>
-          <Add />
-        </IconButton>
-      </CardActions>
+      );
+    }
+  };
+
+  return (
+    <Fragment>
+      <CardContent sx={{ minWidth: "87.5%" }}>{generateContent()}</CardContent>
       <CardInfo />
     </Fragment>
   );
 }
 
-function GenericCard() {
+function GenericCard(props) {
   return (
     <Card
       variant="outlined"
@@ -77,12 +207,36 @@ function GenericCard() {
         justifyContent: "space-between",
       }}
     >
-      <CardContentContainer />
+      <CardContentContainer
+        id={props.id}
+        content={props.card.content}
+        type={props.card.type}
+        project={props.project}
+      />
     </Card>
   );
 }
 
 function CardContainer(props) {
+  const renderCards = () => {
+    let cards = props.project.list[props.project.current].cards;
+    cards = cards.map((card, index) => {
+      if (card) {
+        return (
+          <GenericCard
+            key={index}
+            id={index}
+            card={card}
+            project={props.project}
+          />
+        );
+      } else {
+        return null;
+      }
+    });
+    return cards;
+  };
+
   return (
     <Box
       sx={{
@@ -91,8 +245,7 @@ function CardContainer(props) {
         gridTemplateColumns: "repeat(auto-fit, minmax(150px, 250px))",
       }}
     >
-      <GenericCard />
-      <GenericCard />
+      {renderCards()}
     </Box>
   );
 }

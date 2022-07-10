@@ -10,7 +10,7 @@ class AppContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      projects: [],
+      projects: [{ name: "Default project", cards: [...Array(0)], id: 0 }],
       currentProject: 0,
     };
   }
@@ -20,8 +20,6 @@ class AppContainer extends React.Component {
     const current = Number(localStorage.getItem("current"));
     if (storage) {
       this.setState({ projects: storage });
-    } else {
-      this.setState(this.addProject("Default project"));
     }
     if (current) {
       this.setState({ currentProject: current });
@@ -39,9 +37,34 @@ class AppContainer extends React.Component {
     }
     let newState = this.state.projects.concat({
       name: name,
-      cards: [],
+      cards: [...Array(0)],
       id: this.state.projects.length,
     });
+    this.setState({ projects: newState });
+  }
+
+  addCard(id, type) {
+    let newState = cloneDeep(this.state.projects);
+    let card = { content: undefined, type: type };
+    if (type === "checklist") {
+      card.content = [...Array(0)];
+    }
+    newState[id].cards.push(card);
+    this.setState({ projects: newState });
+  }
+
+  updateCard(id, cardId, content, type, checkboxId) {
+    let newState = cloneDeep(this.state.projects);
+    // new checkbox
+    if (type === "checklist" && checkboxId === undefined) {
+      newState[id].cards[cardId].content.push(content);
+    }
+    // update existing checkbox
+    else if (type === "checklist" && checkboxId >= 0) {
+      newState[id].cards[cardId].content[checkboxId].label = content;
+    } else {
+      newState[id].cards[cardId].content = content;
+    }
     this.setState({ projects: newState });
   }
 
@@ -63,7 +86,12 @@ class AppContainer extends React.Component {
   render() {
     return (
       <Box sx={{ display: "flex", flexDirection: "row" }}>
-        <HeaderBar />
+        <HeaderBar
+          project={{
+            addCard: (id, card) => this.addCard(id, card),
+            current: this.state.currentProject,
+          }}
+        />
         <ProjectDrawer
           project={{
             add: (name) => this.addProject(name),
@@ -76,8 +104,10 @@ class AppContainer extends React.Component {
         />
         <ProjectContainer
           project={{
-            list: this.state.projects,
+            updateCard: (id, cardId, content, type, checkboxId) =>
+              this.updateCard(id, cardId, content, type, checkboxId),
             current: this.state.currentProject,
+            list: this.state.projects,
           }}
         />
       </Box>
