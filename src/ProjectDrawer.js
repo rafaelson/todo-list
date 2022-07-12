@@ -207,7 +207,7 @@ function ProjectList(props) {
       return (
         <ToggleButton
           value={index}
-          key={index}
+          key={project.key}
           sx={{ justifyContent: "space-between" }}
         >
           {project.name}

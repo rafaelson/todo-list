@@ -5,12 +5,15 @@ import { cloneDeep } from "lodash";
 import ProjectDrawer from "./ProjectDrawer";
 import HeaderBar from "./HeaderBar";
 import ProjectContainer from "./ProjectContainer";
+import uniqid from "uniqid";
 
 class AppContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      projects: [{ name: "Default project", cards: [...Array(0)], id: 0 }],
+      projects: [
+        { name: "Default project", cards: [...Array(0)], key: uniqid() },
+      ],
       currentProject: 0,
     };
   }
@@ -38,14 +41,18 @@ class AppContainer extends React.Component {
     let newState = this.state.projects.concat({
       name: name,
       cards: [...Array(0)],
-      id: this.state.projects.length,
+      key: uniqid(),
     });
     this.setState({ projects: newState });
   }
 
   addCard(id, type) {
     let newState = cloneDeep(this.state.projects);
-    let card = { content: undefined, type: type };
+    let card = {
+      content: undefined,
+      type: type,
+      key: uniqid(),
+    };
     if (type === "checklist") {
       card.content = [...Array(0)];
     }

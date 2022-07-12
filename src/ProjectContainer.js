@@ -24,6 +24,7 @@ import {
   Delete,
 } from "@mui/icons-material";
 import { useState } from "react";
+import uniqid from "uniqid";
 
 function CardInfo() {
   return (
@@ -132,7 +133,7 @@ function CardContentContainer(props) {
   };
 
   const addCheckBox = () => {
-    let content = { label: undefined, checked: false };
+    let content = { label: undefined, checked: false, key: uniqid() };
     props.project.updateCard(
       props.project.current,
       props.id,
@@ -168,6 +169,7 @@ function CardContentContainer(props) {
                 id={index}
               />
             }
+            key={cntnt.key}
           />
         );
       });
@@ -224,7 +226,7 @@ function CardContainer(props) {
       if (card) {
         return (
           <GenericCard
-            key={index}
+            key={card.key}
             id={index}
             card={card}
             project={props.project}
