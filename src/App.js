@@ -62,14 +62,20 @@ class AppContainer extends React.Component {
 
   updateCard(id, cardId, content, type, checkboxId) {
     let newState = cloneDeep(this.state.projects);
-    // new checkbox
+    // new checklist item
     if (type === "checklist" && checkboxId === undefined) {
       newState[id].cards[cardId].content.push(content);
     }
-    // update existing checkbox
+    // update existing checklist item
     else if (type === "checklist" && checkboxId >= 0) {
-      newState[id].cards[cardId].content[checkboxId].label = content;
-    } else {
+      newState[id].cards[cardId].content[checkboxId] = Object.assign(
+        {},
+        newState[id].cards[cardId].content[checkboxId],
+        content
+      );
+    }
+    // update note
+    else {
       newState[id].cards[cardId].content = content;
     }
     this.setState({ projects: newState });

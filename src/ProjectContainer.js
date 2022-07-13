@@ -123,10 +123,17 @@ function CardContentContainer(props) {
   };
 
   const handleChangeCheckbox = (e) => {
+    let content;
+    if (e.target.type === "checkbox") {
+      content = { checked: e.target.checked };
+    } else {
+      content = { label: e.target.value };
+    }
+
     props.project.updateCard(
       props.project.current,
       props.id,
-      e.target.value,
+      content,
       "checklist",
       Number(e.target.id)
     );
@@ -159,14 +166,20 @@ function CardContentContainer(props) {
       let listItems = props.content.map((cntnt, index) => {
         return (
           <FormControlLabel
-            control={<Checkbox checked={Boolean(cntnt.checked)} />}
+            control={
+              <Checkbox
+                checked={Boolean(cntnt.checked)}
+                onChange={handleChangeCheckbox}
+                id={index.toString()}
+              />
+            }
             label={
               <Input
                 multiline
                 disableUnderline
                 value={cntnt.label}
                 onChange={handleChangeCheckbox}
-                id={index}
+                id={index.toString()}
               />
             }
             key={cntnt.key}
