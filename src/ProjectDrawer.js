@@ -20,16 +20,15 @@ import {
   Delete,
   MoreVert,
 } from "@mui/icons-material";
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import { Box } from "@mui/system";
-import { useContext } from "react";
-import { drawerContext } from "./App";
+import { projectContext } from "./App";
 
 const drawerWidth = "240px";
 
 function AddProjectForm(props) {
   const [name, setName] = useState("");
-  const project = useContext(drawerContext);
+  const project = useContext(projectContext);
 
   return (
     <Dialog open={props.open} onClose={props.handleClose}>
@@ -64,7 +63,7 @@ function AddProjectForm(props) {
 
 function RenameProjectForm(props) {
   const [name, setName] = useState("");
-  const project = useContext(drawerContext);
+  const project = useContext(projectContext);
   return (
     <Dialog open={props.open} onClose={props.handleClose}>
       <DialogTitle>Rename project</DialogTitle>
@@ -122,7 +121,7 @@ function AddProjectButton(props) {
 function ProjectOptionsMenu(props) {
   const [open, setOpen] = useState(false);
   const [id, setID] = useState(null);
-  const project = useContext(drawerContext);
+  const project = useContext(projectContext);
 
   const handleFormOpen = () => {
     setOpen(true);
@@ -169,7 +168,7 @@ function ProjectOptionsMenu(props) {
 function ProjectList(props) {
   const [view, setView] = useState(0);
   const [anchorEl, setAnchorEl] = useState(false);
-  const project = useContext(drawerContext);
+  const project = useContext(projectContext);
   const open = Boolean(anchorEl);
 
   // Keep selected project between reloads

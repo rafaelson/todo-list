@@ -1,16 +1,13 @@
 import logo from "./logo.svg";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { createContext } from "react";
 import { cloneDeep } from "lodash";
 import ProjectDrawer from "./ProjectDrawer";
 import HeaderBar from "./HeaderBar";
 import ProjectContainer from "./ProjectContainer";
 import uniqid from "uniqid";
-import { createContext } from "react";
+export const projectContext = createContext();
 
-export const headerContext = createContext();
-export const drawerContext = createContext();
-export const containerContext = createContext();
 class AppContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -103,36 +100,23 @@ class AppContainer extends React.Component {
   render() {
     return (
       <Box sx={{ display: "flex", flexDirection: "row" }}>
-        <headerContext.Provider
-          value={{
-            addCard: (id, card) => this.addCard(id, card),
-            current: this.state.currentProject,
-          }}
-        >
-          <HeaderBar />
-        </headerContext.Provider>
-        <drawerContext.Provider
+        <projectContext.Provider
           value={{
             add: (name) => this.addProject(name),
             rename: (id, name) => this.renameProject(id, name),
             delete: (id) => this.deleteProject(id),
             setCurrent: (id) => this.setState({ currentProject: Number(id) }),
-            current: this.state.currentProject,
-            list: this.state.projects,
-          }}
-        >
-          <ProjectDrawer />
-        </drawerContext.Provider>
-        <containerContext.Provider
-          value={{
+            addCard: (id, card) => this.addCard(id, card),
             updateCard: (id, cardId, content, type, checkboxId) =>
               this.updateCard(id, cardId, content, type, checkboxId),
             current: this.state.currentProject,
             list: this.state.projects,
           }}
         >
+          <HeaderBar />
+          <ProjectDrawer />
           <ProjectContainer />
-        </containerContext.Provider>
+        </projectContext.Provider>
       </Box>
     );
   }

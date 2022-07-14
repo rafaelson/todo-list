@@ -16,13 +16,12 @@ import {
   Radio,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
-import { Fragment, useState } from "react";
-import { useContext } from "react";
-import { headerContext } from "./App";
+import { Fragment, useState, useContext } from "react";
+import { projectContext } from "./App";
 
 function AddCardForm(props) {
   const [value, setValue] = useState(undefined);
-  const project = useContext(headerContext);
+  const project = useContext(projectContext);
 
   const handleChange = (event) => {
     setValue(event.target.value);

@@ -15,7 +15,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { Fragment } from "react";
+import { Fragment, useState, useContext } from "react";
 import {
   AccessTime,
   MoreVert,
@@ -23,10 +23,8 @@ import {
   DriveFileRenameOutline,
   Delete,
 } from "@mui/icons-material";
-import { useState } from "react";
 import uniqid from "uniqid";
-import { useContext } from "react";
-import { containerContext } from "./App";
+import { projectContext } from "./App";
 
 function CardInfo() {
   return (
@@ -55,7 +53,7 @@ function CardInfo() {
 function ProjectOptionsMenu(props) {
   const [open, setOpen] = useState(false);
   const [id, setID] = useState(null);
-  const project = useContext(containerContext);
+  const project = useContext(projectContext);
 
   const handleFormOpen = () => {
     setOpen(true);
@@ -100,7 +98,7 @@ function ProjectOptionsMenu(props) {
 
 function CardContentContainer(props) {
   const [anchorEl, setAnchorEl] = useState(false);
-  const project = useContext(containerContext);
+  const project = useContext(projectContext);
 
   const open = Boolean(anchorEl);
 
@@ -227,7 +225,7 @@ function GenericCard(props) {
 }
 
 function CardContainer(props) {
-  const project = useContext(containerContext);
+  const project = useContext(projectContext);
   const renderCards = () => {
     let cards = project.list[project.current].cards;
     cards = cards.map((card, index) => {
