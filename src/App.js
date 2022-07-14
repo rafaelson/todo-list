@@ -6,7 +6,11 @@ import ProjectDrawer from "./ProjectDrawer";
 import HeaderBar from "./HeaderBar";
 import ProjectContainer from "./ProjectContainer";
 import uniqid from "uniqid";
+import { createContext } from "react";
 
+export const headerContext = createContext();
+export const drawerContext = createContext();
+export const containerContext = createContext();
 class AppContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -99,14 +103,16 @@ class AppContainer extends React.Component {
   render() {
     return (
       <Box sx={{ display: "flex", flexDirection: "row" }}>
-        <HeaderBar
-          project={{
+        <headerContext.Provider
+          value={{
             addCard: (id, card) => this.addCard(id, card),
             current: this.state.currentProject,
           }}
-        />
-        <ProjectDrawer
-          project={{
+        >
+          <HeaderBar />
+        </headerContext.Provider>
+        <drawerContext.Provider
+          value={{
             add: (name) => this.addProject(name),
             rename: (id, name) => this.renameProject(id, name),
             delete: (id) => this.deleteProject(id),
@@ -114,15 +120,19 @@ class AppContainer extends React.Component {
             current: this.state.currentProject,
             list: this.state.projects,
           }}
-        />
-        <ProjectContainer
-          project={{
+        >
+          <ProjectDrawer />
+        </drawerContext.Provider>
+        <containerContext.Provider
+          value={{
             updateCard: (id, cardId, content, type, checkboxId) =>
               this.updateCard(id, cardId, content, type, checkboxId),
             current: this.state.currentProject,
             list: this.state.projects,
           }}
-        />
+        >
+          <ProjectContainer />
+        </containerContext.Provider>
       </Box>
     );
   }

@@ -22,11 +22,14 @@ import {
 } from "@mui/icons-material";
 import { useState, useEffect, Fragment } from "react";
 import { Box } from "@mui/system";
+import { useContext } from "react";
+import { drawerContext } from "./App";
 
 const drawerWidth = "240px";
 
 function AddProjectForm(props) {
   const [name, setName] = useState("");
+  const project = useContext(drawerContext);
 
   return (
     <Dialog open={props.open} onClose={props.handleClose}>
@@ -48,7 +51,7 @@ function AddProjectForm(props) {
         <Button
           onClick={() => {
             props.handleClose();
-            props.project.add(name);
+            project.add(name);
             setName("");
           }}
         >
@@ -61,6 +64,7 @@ function AddProjectForm(props) {
 
 function RenameProjectForm(props) {
   const [name, setName] = useState("");
+  const project = useContext(drawerContext);
   return (
     <Dialog open={props.open} onClose={props.handleClose}>
       <DialogTitle>Rename project</DialogTitle>
@@ -81,7 +85,7 @@ function RenameProjectForm(props) {
         <Button
           onClick={() => {
             props.handleClose();
-            props.project.rename(props.id, name);
+            project.rename(props.id, name);
             setName("");
           }}
         >
@@ -110,11 +114,7 @@ function AddProjectButton(props) {
           <Add />
         </IconButton>
       </ListItem>
-      <AddProjectForm
-        open={open}
-        handleClose={handleClose}
-        project={props.project}
-      />
+      <AddProjectForm open={open} handleClose={handleClose} />
     </Fragment>
   );
 }
@@ -122,6 +122,7 @@ function AddProjectButton(props) {
 function ProjectOptionsMenu(props) {
   const [open, setOpen] = useState(false);
   const [id, setID] = useState(null);
+  const project = useContext(drawerContext);
 
   const handleFormOpen = () => {
     setOpen(true);
@@ -153,19 +154,14 @@ function ProjectOptionsMenu(props) {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            props.project.delete(props.anchorEl.id);
+            project.delete(props.anchorEl.id);
             props.handleClose();
           }}
         >
           <Delete /> Delete
         </MenuItem>
       </Menu>
-      <RenameProjectForm
-        open={open}
-        handleClose={handleFormClose}
-        project={props.project}
-        id={id}
-      />
+      <RenameProjectForm open={open} handleClose={handleFormClose} id={id} />
     </Fragment>
   );
 }
@@ -173,14 +169,15 @@ function ProjectOptionsMenu(props) {
 function ProjectList(props) {
   const [view, setView] = useState(0);
   const [anchorEl, setAnchorEl] = useState(false);
+  const project = useContext(drawerContext);
   const open = Boolean(anchorEl);
 
   // Keep selected project between reloads
   useEffect(() => {
-    if (view !== props.project.current) {
-      setView(props.project.current);
+    if (view !== project.current) {
+      setView(project.current);
     }
-  }, [props.project, view]);
+  }, [project, view]);
 
   const mouseDown = (e) => {
     e.stopPropagation();
@@ -198,12 +195,12 @@ function ProjectList(props) {
   const handleChange = (event, change) => {
     if (change != null) {
       setView(change);
-      props.project.setCurrent(event.target.value);
+      project.setCurrent(event.target.value);
     }
   };
 
   const renderProjects = () => {
-    let projectElements = props.project.list.map((project, index) => {
+    let projectElements = project.list.map((project, index) => {
       return (
         <ToggleButton
           value={index}
@@ -231,12 +228,11 @@ function ProjectList(props) {
       >
         {renderProjects()}
       </ToggleButtonGroup>
-      <AddProjectButton project={props.project} />
+      <AddProjectButton />
       <ProjectOptionsMenu
         anchorEl={anchorEl}
         open={open}
         handleClose={handleClose}
-        project={props.project}
       />
     </Fragment>
   );
@@ -257,7 +253,7 @@ function ProjectDrawer(props) {
     >
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
-        <ProjectList project={props.project} />
+        <ProjectList />
       </Box>
     </Drawer>
   );

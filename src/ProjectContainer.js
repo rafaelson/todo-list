@@ -25,6 +25,8 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import uniqid from "uniqid";
+import { useContext } from "react";
+import { containerContext } from "./App";
 
 function CardInfo() {
   return (
@@ -53,6 +55,7 @@ function CardInfo() {
 function ProjectOptionsMenu(props) {
   const [open, setOpen] = useState(false);
   const [id, setID] = useState(null);
+  const project = useContext(containerContext);
 
   const handleFormOpen = () => {
     setOpen(true);
@@ -84,7 +87,7 @@ function ProjectOptionsMenu(props) {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            props.project.delete(props.anchorEl.id);
+            project.delete(props.anchorEl.id);
             props.handleClose();
           }}
         >
@@ -97,6 +100,8 @@ function ProjectOptionsMenu(props) {
 
 function CardContentContainer(props) {
   const [anchorEl, setAnchorEl] = useState(false);
+  const project = useContext(containerContext);
+
   const open = Boolean(anchorEl);
 
   const mouseDown = (e) => {
@@ -114,12 +119,7 @@ function CardContentContainer(props) {
   };
 
   const handleChangeNote = (e) => {
-    props.project.updateCard(
-      props.project.current,
-      props.id,
-      e.target.value,
-      "note"
-    );
+    project.updateCard(project.current, props.id, e.target.value, "note");
   };
 
   const handleChangeCheckbox = (e) => {
@@ -130,8 +130,8 @@ function CardContentContainer(props) {
       content = { label: e.target.value };
     }
 
-    props.project.updateCard(
-      props.project.current,
+    project.updateCard(
+      project.current,
       props.id,
       content,
       "checklist",
@@ -141,12 +141,7 @@ function CardContentContainer(props) {
 
   const addCheckBox = () => {
     let content = { label: undefined, checked: false, key: uniqid() };
-    props.project.updateCard(
-      props.project.current,
-      props.id,
-      content,
-      "checklist"
-    );
+    project.updateCard(project.current, props.id, content, "checklist");
   };
 
   const generateContent = () => {
@@ -226,25 +221,18 @@ function GenericCard(props) {
         id={props.id}
         content={props.card.content}
         type={props.card.type}
-        project={props.project}
       />
     </Card>
   );
 }
 
 function CardContainer(props) {
+  const project = useContext(containerContext);
   const renderCards = () => {
-    let cards = props.project.list[props.project.current].cards;
+    let cards = project.list[project.current].cards;
     cards = cards.map((card, index) => {
       if (card) {
-        return (
-          <GenericCard
-            key={card.key}
-            id={index}
-            card={card}
-            project={props.project}
-          />
-        );
+        return <GenericCard key={card.key} id={index} card={card} />;
       } else {
         return null;
       }
@@ -269,7 +257,7 @@ function ProjectContainer(props) {
   return (
     <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
       <Toolbar />
-      <CardContainer project={props.project} />
+      <CardContainer />
     </Box>
   );
 }

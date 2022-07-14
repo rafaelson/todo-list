@@ -17,9 +17,12 @@ import {
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { Fragment, useState } from "react";
+import { useContext } from "react";
+import { headerContext } from "./App";
 
 function AddCardForm(props) {
   const [value, setValue] = useState(undefined);
+  const project = useContext(headerContext);
 
   const handleChange = (event) => {
     setValue(event.target.value);
@@ -47,7 +50,7 @@ function AddCardForm(props) {
           onClick={() => {
             if (value) {
               props.handleClose();
-              props.project.addCard(props.project.current, value);
+              project.addCard(project.current, value);
             }
           }}
         >
@@ -74,11 +77,7 @@ function AddCardButton(props) {
       <IconButton onClick={handleClickOpen}>
         <Add />
       </IconButton>
-      <AddCardForm
-        open={open}
-        handleClose={handleClose}
-        project={props.project}
-      />
+      <AddCardForm open={open} handleClose={handleClose} />
     </Fragment>
   );
 }
@@ -88,7 +87,7 @@ function HeaderBar(props) {
     <AppBar sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar variant="dense" sx={{ justifyContent: "space-between" }}>
         <Typography variant="h5">ToDo App</Typography>
-        <AddCardButton project={props.project} />
+        <AddCardButton />
       </Toolbar>
     </AppBar>
   );
