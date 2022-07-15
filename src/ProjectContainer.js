@@ -15,7 +15,8 @@ import {
   MenuItem,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { Fragment, useState, useContext } from "react";
+import { Fragment, useState } from "react";
+import { useContextSelector } from "use-context-selector";
 import {
   AccessTime,
   MoreVert,
@@ -53,7 +54,10 @@ function CardInfo() {
 function ProjectOptionsMenu(props) {
   const [open, setOpen] = useState(false);
   const [id, setID] = useState(null);
-  const project = useContext(projectContext);
+  const deleteProject = useContextSelector(
+    projectContext,
+    (project) => project.delete
+  );
 
   const handleFormOpen = () => {
     setOpen(true);
@@ -85,7 +89,7 @@ function ProjectOptionsMenu(props) {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            project.delete(props.anchorEl.id);
+            deleteProject(props.anchorEl.id);
             props.handleClose();
           }}
         >
@@ -98,7 +102,14 @@ function ProjectOptionsMenu(props) {
 
 function CardContentContainer(props) {
   const [anchorEl, setAnchorEl] = useState(false);
-  const project = useContext(projectContext);
+  const updateCard = useContextSelector(
+    projectContext,
+    (project) => project.updateCard
+  );
+  const current = useContextSelector(
+    projectContext,
+    (project) => project.current
+  );
 
   const open = Boolean(anchorEl);
 
@@ -117,7 +128,7 @@ function CardContentContainer(props) {
   };
 
   const handleChangeNote = (e) => {
-    project.updateCard(project.current, props.id, e.target.value, "note");
+    updateCard(current, props.id, e.target.value, "note");
   };
 
   const handleChangeCheckbox = (e) => {
@@ -128,18 +139,12 @@ function CardContentContainer(props) {
       content = { label: e.target.value };
     }
 
-    project.updateCard(
-      project.current,
-      props.id,
-      content,
-      "checklist",
-      Number(e.target.id)
-    );
+    updateCard(current, props.id, content, "checklist", Number(e.target.id));
   };
 
   const addCheckBox = () => {
     let content = { label: undefined, checked: false, key: uniqid() };
-    project.updateCard(project.current, props.id, content, "checklist");
+    updateCard(current, props.id, content, "checklist");
   };
 
   const generateContent = () => {
@@ -225,9 +230,16 @@ function GenericCard(props) {
 }
 
 function CardContainer(props) {
-  const project = useContext(projectContext);
+  const projectList = useContextSelector(
+    projectContext,
+    (project) => project.list
+  );
+  const current = useContextSelector(
+    projectContext,
+    (project) => project.current
+  );
   const renderCards = () => {
-    let cards = project.list[project.current].cards;
+    let cards = projectList[current].cards;
     cards = cards.map((card, index) => {
       if (card) {
         return <GenericCard key={card.key} id={index} card={card} />;

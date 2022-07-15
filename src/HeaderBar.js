@@ -16,12 +16,20 @@ import {
   Radio,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
-import { Fragment, useState, useContext } from "react";
+import { Fragment, useState } from "react";
+import { useContextSelector } from "use-context-selector";
 import { projectContext } from "./App";
 
 function AddCardForm(props) {
   const [value, setValue] = useState(undefined);
-  const project = useContext(projectContext);
+  const current = useContextSelector(
+    projectContext,
+    (project) => project.current
+  );
+  const addCard = useContextSelector(
+    projectContext,
+    (project) => project.addCard
+  );
 
   const handleChange = (event) => {
     setValue(event.target.value);
@@ -49,7 +57,7 @@ function AddCardForm(props) {
           onClick={() => {
             if (value) {
               props.handleClose();
-              project.addCard(project.current, value);
+              addCard(current, value);
             }
           }}
         >

@@ -20,7 +20,8 @@ import {
   Delete,
   MoreVert,
 } from "@mui/icons-material";
-import { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
+import { useContextSelector } from "use-context-selector";
 import { Box } from "@mui/system";
 import { projectContext } from "./App";
 
@@ -28,7 +29,10 @@ const drawerWidth = "240px";
 
 function AddProjectForm(props) {
   const [name, setName] = useState("");
-  const project = useContext(projectContext);
+  const addProject = useContextSelector(
+    projectContext,
+    (project) => project.add
+  );
 
   return (
     <Dialog open={props.open} onClose={props.handleClose}>
@@ -50,7 +54,7 @@ function AddProjectForm(props) {
         <Button
           onClick={() => {
             props.handleClose();
-            project.add(name);
+            addProject(name);
             setName("");
           }}
         >
@@ -63,7 +67,10 @@ function AddProjectForm(props) {
 
 function RenameProjectForm(props) {
   const [name, setName] = useState("");
-  const project = useContext(projectContext);
+  const renameProject = useContextSelector(
+    projectContext,
+    (project) => project.rename
+  );
   return (
     <Dialog open={props.open} onClose={props.handleClose}>
       <DialogTitle>Rename project</DialogTitle>
@@ -84,7 +91,7 @@ function RenameProjectForm(props) {
         <Button
           onClick={() => {
             props.handleClose();
-            project.rename(props.id, name);
+            renameProject(props.id, name);
             setName("");
           }}
         >
@@ -121,7 +128,11 @@ function AddProjectButton(props) {
 function ProjectOptionsMenu(props) {
   const [open, setOpen] = useState(false);
   const [id, setID] = useState(null);
-  const project = useContext(projectContext);
+
+  const deleteProject = useContextSelector(
+    projectContext,
+    (project) => project.delete
+  );
 
   const handleFormOpen = () => {
     setOpen(true);
@@ -153,7 +164,7 @@ function ProjectOptionsMenu(props) {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            project.delete(props.anchorEl.id);
+            deleteProject(props.anchorEl.id);
             props.handleClose();
           }}
         >
@@ -168,15 +179,29 @@ function ProjectOptionsMenu(props) {
 function ProjectList(props) {
   const [view, setView] = useState(0);
   const [anchorEl, setAnchorEl] = useState(false);
-  const project = useContext(projectContext);
+
+  const current = useContextSelector(
+    projectContext,
+    (project) => project.current
+  );
+
+  const projectList = useContextSelector(
+    projectContext,
+    (project) => project.list
+  );
+
+  const setCurrent = useContextSelector(
+    projectContext,
+    (project) => project.setCurrent
+  );
   const open = Boolean(anchorEl);
 
   // Keep selected project between reloads
   useEffect(() => {
-    if (view !== project.current) {
-      setView(project.current);
+    if (view !== current) {
+      setView(current);
     }
-  }, [project, view]);
+  }, [current, view]);
 
   const mouseDown = (e) => {
     e.stopPropagation();
@@ -194,12 +219,12 @@ function ProjectList(props) {
   const handleChange = (event, change) => {
     if (change != null) {
       setView(change);
-      project.setCurrent(event.target.value);
+      setCurrent(event.target.value);
     }
   };
 
   const renderProjects = () => {
-    let projectElements = project.list.map((project, index) => {
+    let projectElements = projectList.map((project, index) => {
       return (
         <ToggleButton
           value={index}

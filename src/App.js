@@ -1,6 +1,7 @@
 import logo from "./logo.svg";
 import { Box } from "@mui/system";
-import React, { createContext } from "react";
+import React from "react";
+import { createContext } from "use-context-selector";
 import { cloneDeep } from "lodash";
 import ProjectDrawer from "./ProjectDrawer";
 import HeaderBar from "./HeaderBar";
