@@ -102,6 +102,7 @@ function ProjectOptionsMenu(props) {
 
 function CardContentContainer(props) {
   const [anchorEl, setAnchorEl] = useState(false);
+  const [currentTimeout, setCurrentTimeout] = useState(undefined);
   const updateCard = useContextSelector(
     projectContext,
     (project) => project.updateCard
@@ -142,6 +143,17 @@ function CardContentContainer(props) {
     updateCard(current, props.id, content, "checklist", Number(e.target.id));
   };
 
+  const handleTimeoutCallback = (e, type) => {
+    if (currentTimeout) {
+      clearTimeout(currentTimeout);
+    }
+    if (type === "checkbox") {
+      setCurrentTimeout(setTimeout(handleChangeCheckbox.bind(null, e), 2000));
+    } else {
+      setCurrentTimeout(setTimeout(handleChangeNote.bind(null, e), 2000));
+    }
+  };
+
   const addCheckBox = () => {
     let content = { label: undefined, checked: false, key: uniqid() };
     updateCard(current, props.id, content, "checklist");
@@ -154,9 +166,9 @@ function CardContentContainer(props) {
           <Input
             multiline
             disableUnderline
-            value={props.content}
+            defaultValue={props.content}
             placeholder="Insert a note"
-            onChange={handleChangeNote}
+            onChange={handleTimeoutCallback}
           />
         </Typography>
       );
@@ -175,8 +187,8 @@ function CardContentContainer(props) {
               <Input
                 multiline
                 disableUnderline
-                value={cntnt.label}
-                onChange={handleChangeCheckbox}
+                defaultValue={cntnt.label}
+                onChange={(e) => handleTimeoutCallback(e, "checkbox")}
                 id={index.toString()}
               />
             }
