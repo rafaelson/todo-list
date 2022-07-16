@@ -148,9 +148,9 @@ function CardContentContainer(props) {
       clearTimeout(currentTimeout);
     }
     if (type === "checkbox") {
-      setCurrentTimeout(setTimeout(handleChangeCheckbox.bind(null, e), 2000));
+      setCurrentTimeout(setTimeout(handleChangeCheckbox.bind(null, e), 1000));
     } else {
-      setCurrentTimeout(setTimeout(handleChangeNote.bind(null, e), 2000));
+      setCurrentTimeout(setTimeout(handleChangeNote.bind(null, e), 1000));
     }
   };
 
