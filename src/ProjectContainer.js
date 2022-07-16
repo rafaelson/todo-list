@@ -165,6 +165,7 @@ function CardContentContainer(props) {
         <Typography>
           <Input
             multiline
+            maxRows={9}
             disableUnderline
             defaultValue={props.content}
             placeholder="Insert a note"
@@ -186,6 +187,7 @@ function CardContentContainer(props) {
             label={
               <Input
                 multiline
+                maxRows={9}
                 disableUnderline
                 defaultValue={cntnt.label}
                 onChange={(e) => handleTimeoutCallback(e, "checkbox")}
@@ -212,7 +214,9 @@ function CardContentContainer(props) {
 
   return (
     <Fragment>
-      <CardContent sx={{ minWidth: "87.5%" }}>{generateContent()}</CardContent>
+      <CardContent sx={{ minWidth: "87.5%", overflowY: "auto" }}>
+        {generateContent()}
+      </CardContent>
       <CardInfo />
     </Fragment>
   );
@@ -225,7 +229,7 @@ function GenericCard(props) {
       sx={{
         minWidth: 230,
         maxWidth: 280,
-        minHeight: 300,
+        height: 300,
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
