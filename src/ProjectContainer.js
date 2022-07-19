@@ -255,15 +255,20 @@ function CardContainer(props) {
     (project) => project.current
   );
   const renderCards = () => {
-    let cards = projectList[current].cards;
-    cards = cards.map((card, index) => {
-      if (card) {
-        return <GenericCard key={card.key} id={index} card={card} />;
-      } else {
-        return null;
-      }
-    });
-    return cards;
+    let cards;
+    if (projectList.length > 0) {
+      cards = projectList[current].cards;
+    }
+    if (cards) {
+      cards = cards.map((card, index) => {
+        if (card) {
+          return <GenericCard key={card.key} id={index} card={card} />;
+        } else {
+          return null;
+        }
+      });
+      return cards;
+    }
   };
 
   return (
