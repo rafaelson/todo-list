@@ -175,12 +175,15 @@ function CardContentContainer(props) {
     updateCard(current, props.id, content, "checklist");
   };
 
+  const deleteCheckBox = (id) => {
+    let content = null;
+    updateCard(current, props.id, content, "checklist", id);
+  };
+
   const changeDeleteButtonVisibility = (index) => {
     if (itemsRef.current[index] && itemsRef.current[index].visibility) {
       return itemsRef.current[index].visibility;
-    } else {
-      return "hidden";
-    }
+    } else return "hidden";
   };
 
   const generateContent = () => {
@@ -246,9 +249,7 @@ function CardContentContainer(props) {
             >
               <IconButton
                 id={index}
-                onClick={(e) => {
-                  console.log(itemsRef.current[index]);
-                }}
+                onClick={() => deleteCheckBox(index)}
                 ref={(e) => {
                   itemsRef.current[index] = e;
                   if (e) {

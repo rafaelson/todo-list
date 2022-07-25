@@ -70,11 +70,18 @@ class AppContainer extends React.Component {
     }
     // update existing checklist item
     else if (type === "checklist" && checkboxId >= 0) {
-      newState[id].cards[cardId].content[checkboxId] = Object.assign(
-        {},
-        newState[id].cards[cardId].content[checkboxId],
-        content
-      );
+      // delete item
+      if (!content) {
+        newState[id].cards[cardId].content.splice(checkboxId, 1);
+      }
+      // update item
+      else {
+        newState[id].cards[cardId].content[checkboxId] = Object.assign(
+          {},
+          newState[id].cards[cardId].content[checkboxId],
+          content
+        );
+      }
     }
     // update note
     else {
