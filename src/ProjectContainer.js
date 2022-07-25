@@ -110,7 +110,9 @@ function CardContentContainer(props) {
   const itemsRef = useRef([]);
 
   useEffect(() => {
-    itemsRef.current = itemsRef.current.slice(0, props.content.length);
+    if (Array.isArray(props.content)) {
+      itemsRef.current = itemsRef.current.slice(0, props.content.length);
+    }
   }, [props.content]);
 
   const useForceUpdate = () => {
