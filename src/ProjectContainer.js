@@ -23,9 +23,13 @@ import {
   Add,
   DriveFileRenameOutline,
   Delete,
+  Clear,
+  ClearRounded,
 } from "@mui/icons-material";
 import uniqid from "uniqid";
 import { projectContext } from "./App";
+import { useRef } from "react";
+import { useEffect } from "react";
 
 function CardInfo() {
   return (
@@ -103,6 +107,18 @@ function ProjectOptionsMenu(props) {
 function CardContentContainer(props) {
   const [anchorEl, setAnchorEl] = useState(false);
   const [currentTimeout, setCurrentTimeout] = useState(undefined);
+  const itemsRef = useRef([]);
+
+  useEffect(() => {
+    itemsRef.current = itemsRef.current.slice(0, props.content.length);
+  }, [props.content]);
+
+  const useForceUpdate = () => {
+    const [value, setValue] = useState(0);
+    return () => setValue((value) => value + 1);
+  };
+  const forceUpdate = useForceUpdate();
+
   const updateCard = useContextSelector(
     projectContext,
     (project) => project.updateCard
@@ -159,7 +175,21 @@ function CardContentContainer(props) {
     updateCard(current, props.id, content, "checklist");
   };
 
+  const changeDeleteButtonVisibility = (index) => {
+    if (itemsRef.current[index] && itemsRef.current[index].visibility) {
+      return itemsRef.current[index].visibility;
+    } else {
+      return "hidden";
+    }
+  };
+
   const generateContent = () => {
+    // itemsRef.current.map((ref, index) => {
+    //   ref.visibility = "hidden";
+    // });
+
+    // itemsRef.current.forEach((el) => (el.visibility = "hidden"));
+
     if (props.type === "note") {
       return (
         <Typography>
@@ -176,32 +206,67 @@ function CardContentContainer(props) {
     } else {
       let listItems = props.content.map((cntnt, index) => {
         return (
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={Boolean(cntnt.checked)}
-                onChange={handleChangeCheckbox}
-                id={index.toString()}
-              />
-            }
-            label={
-              <Input
-                multiline
-                maxRows={9}
-                disableUnderline
-                defaultValue={cntnt.label}
-                onChange={(e) => handleTimeoutCallback(e, "checkbox")}
-                id={index.toString()}
-              />
-            }
+          <Box
+            sx={{ display: "flex", alignItems: "center" }}
+            onMouseOver={(e) => {
+              if (e.target.id) {
+                itemsRef.current[e.target.id].visibility = "visible";
+                forceUpdate();
+              }
+            }}
             key={cntnt.key}
-          />
+          >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={Boolean(cntnt.checked)}
+                  onChange={handleChangeCheckbox}
+                  id={index.toString()}
+                />
+              }
+              label={
+                <Input
+                  multiline
+                  maxRows={9}
+                  disableUnderline
+                  defaultValue={cntnt.label}
+                  onChange={(e) => handleTimeoutCallback(e, "checkbox")}
+                  id={index.toString()}
+                />
+              }
+            />
+            <Box
+              onMouseEnter={(e) => {
+                if (e.target.firstChild.id) {
+                  itemsRef.current[e.target.firstChild.id].visibility =
+                    "visible";
+                  forceUpdate();
+                }
+              }}
+            >
+              <IconButton
+                id={index}
+                onClick={(e) => {
+                  console.log(itemsRef.current[index]);
+                }}
+                ref={(e) => {
+                  itemsRef.current[index] = e;
+                  if (e) {
+                    itemsRef.current[index].visibility = "hidden";
+                  }
+                }}
+                sx={{ visibility: `${changeDeleteButtonVisibility(index)}` }}
+              >
+                <Clear />
+              </IconButton>
+            </Box>
+          </Box>
         );
       });
 
       return (
         <FormGroup>
-          {listItems}
+          <Box onMouseLeave={forceUpdate}>{listItems}</Box>
           <CardActions sx={{ justifyContent: "flex-end" }}>
             <IconButton onClick={addCheckBox}>
               <Add />
