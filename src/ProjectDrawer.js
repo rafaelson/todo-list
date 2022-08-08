@@ -19,6 +19,7 @@ import {
   DriveFileRenameOutline,
   Delete,
   MoreVert,
+  DeleteOutline,
 } from "@mui/icons-material";
 import { useState, useEffect, Fragment } from "react";
 import { useContextSelector } from "use-context-selector";
@@ -168,7 +169,7 @@ function ProjectOptionsMenu(props) {
             props.handleClose();
           }}
         >
-          <Delete /> Delete
+          <DeleteOutline /> Delete
         </MenuItem>
       </Menu>
       <RenameProjectForm open={open} handleClose={handleFormClose} id={id} />
