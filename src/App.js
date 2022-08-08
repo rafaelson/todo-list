@@ -62,6 +62,12 @@ class AppContainer extends React.Component {
     this.setState({ projects: newState });
   }
 
+  deleteCard(id, cardId) {
+    let newState = cloneDeep(this.state.projects);
+    newState[id].cards.splice(cardId, 1);
+    this.setState({ projects: newState });
+  }
+
   updateCard(id, cardId, content, type, checkboxId) {
     let newState = cloneDeep(this.state.projects);
     // new checklist item
@@ -115,6 +121,7 @@ class AppContainer extends React.Component {
             delete: (id) => this.deleteProject(id),
             setCurrent: (id) => this.setState({ currentProject: Number(id) }),
             addCard: (id, card) => this.addCard(id, card),
+            deleteCard: (id, cardId) => this.deleteCard(id, cardId),
             updateCard: (id, cardId, content, type, checkboxId) =>
               this.updateCard(id, cardId, content, type, checkboxId),
             current: this.state.currentProject,

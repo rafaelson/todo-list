@@ -25,13 +25,69 @@ import {
   Delete,
   Clear,
   ClearRounded,
+  AddAlert,
+  AddAlertOutlined,
+  DeleteOutline,
 } from "@mui/icons-material";
 import uniqid from "uniqid";
 import { projectContext } from "./App";
 import { useRef } from "react";
 import { useEffect } from "react";
 
-function CardInfo() {
+function CardOptionsMenu(props) {
+  const deleteCard = useContextSelector(
+    projectContext,
+    (project) => project.deleteCard
+  );
+
+  const current = useContextSelector(
+    projectContext,
+    (project) => project.current
+  );
+
+  return (
+    <Fragment>
+      <Menu
+        id="project-options-menu"
+        MenuListProps={{
+          "aria-labelledby": "project-options-menu-button",
+        }}
+        anchorEl={props.anchorEl}
+        open={props.open}
+        onClose={props.handleClose}
+      >
+        <MenuItem
+          onClick={() => {
+            props.handleClose();
+          }}
+        >
+          <AddAlertOutlined /> Set Reminder
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            deleteCard(current, props.id);
+            props.handleClose();
+          }}
+        >
+          <DeleteOutline /> Delete
+        </MenuItem>
+      </Menu>
+    </Fragment>
+  );
+}
+
+function CardInfo(props) {
+  const [anchorEl, setAnchorEl] = useState(false);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Box
       sx={{
@@ -48,59 +104,19 @@ function CardInfo() {
         variant="outlined"
         sx={{ marginBottom: 1, marginLeft: 1 }}
       />
-      <IconButton sx={{ p: 0, marginBottom: 1, marginRight: 1 }}>
+      <IconButton
+        onClick={handleClick}
+        sx={{ p: 0, marginBottom: 1, marginRight: 1 }}
+      >
         <MoreVert />
       </IconButton>
+      <CardOptionsMenu
+        handleClose={handleClose}
+        open={open}
+        anchorEl={anchorEl}
+        id={props.id}
+      />
     </Box>
-  );
-}
-
-function ProjectOptionsMenu(props) {
-  const [open, setOpen] = useState(false);
-  const [id, setID] = useState(null);
-  const deleteProject = useContextSelector(
-    projectContext,
-    (project) => project.delete
-  );
-
-  const handleFormOpen = () => {
-    setOpen(true);
-  };
-
-  const handleFormClose = () => {
-    setOpen(false);
-  };
-
-  return (
-    <Fragment>
-      <Menu
-        id="project-options-menu"
-        MenuListProps={{
-          "aria-labelledby": "project-options-menu-button",
-        }}
-        anchorEl={props.anchorEl}
-        open={props.open}
-        onClose={props.handleClose}
-      >
-        <MenuItem
-          onClick={() => {
-            setID(props.anchorEl.id);
-            handleFormOpen();
-            props.handleClose();
-          }}
-        >
-          <DriveFileRenameOutline /> Change
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            deleteProject(props.anchorEl.id);
-            props.handleClose();
-          }}
-        >
-          <Delete /> Delete
-        </MenuItem>
-      </Menu>
-    </Fragment>
   );
 }
 
@@ -285,7 +301,7 @@ function CardContentContainer(props) {
       <CardContent sx={{ minWidth: "87.5%", overflowY: "auto" }}>
         {generateContent()}
       </CardContent>
-      <CardInfo />
+      <CardInfo id={props.id} />
     </Fragment>
   );
 }
