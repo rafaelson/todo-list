@@ -18,7 +18,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  FormControl,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -28,11 +27,7 @@ import {
   AccessTime,
   MoreVert,
   Add,
-  DriveFileRenameOutline,
-  Delete,
   Clear,
-  ClearRounded,
-  AddAlert,
   AddAlertOutlined,
   DeleteOutline,
 } from "@mui/icons-material";
@@ -49,10 +44,6 @@ function AddReminderForm(props) {
     projectContext,
     (project) => project.current
   );
-  const addCard = useContextSelector(
-    projectContext,
-    (project) => project.addCard
-  );
   const setReminder = useContextSelector(
     projectContext,
     (project) => project.setReminder
@@ -61,10 +52,6 @@ function AddReminderForm(props) {
     projectContext,
     (project) => project.deleteReminder
   );
-
-  const handleChange = (event) => {
-    setValue(event.target.value);
-  };
 
   const setOrEdit = () => {
     if (props.reminderExists) return "Edit reminder";
@@ -144,7 +131,7 @@ function CardOptionsMenu(props) {
   );
 
   const checkIfReminderExists = (() => {
-    if (props.reminder && reminderExists != true) setReminderExistence(true);
+    if (props.reminder && reminderExists !== true) setReminderExistence(true);
     else if (props.reminder === undefined && reminderExists !== false)
       setReminderExistence(false);
   })();
@@ -263,7 +250,6 @@ function CardInfo(props) {
 }
 
 function CardContentContainer(props) {
-  const [anchorEl, setAnchorEl] = useState(false);
   const [currentTimeout, setCurrentTimeout] = useState(undefined);
   const itemsRef = useRef([]);
 
@@ -287,22 +273,6 @@ function CardContentContainer(props) {
     projectContext,
     (project) => project.current
   );
-
-  const open = Boolean(anchorEl);
-
-  const mouseDown = (e) => {
-    // e.stopPropagation();
-    handleClick(e);
-    console.log(e.currentTarget);
-  };
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleChangeNote = (e) => {
     updateCard(current, props.id, e.target.value, "note");

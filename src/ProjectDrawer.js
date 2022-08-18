@@ -17,7 +17,6 @@ import {
 import {
   Add,
   DriveFileRenameOutline,
-  Delete,
   MoreVert,
   DeleteOutline,
 } from "@mui/icons-material";

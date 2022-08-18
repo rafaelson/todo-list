@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import { Box } from "@mui/system";
 import React from "react";
 import { createContext } from "use-context-selector";
