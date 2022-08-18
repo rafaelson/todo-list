@@ -40,14 +40,17 @@ import { format, parseISO } from "date-fns";
 
 function AddReminderForm(props) {
   const [value, setValue] = useState(new Date());
+
   const current = useContextSelector(
     projectContext,
     (project) => project.current
   );
+
   const setReminder = useContextSelector(
     projectContext,
     (project) => project.setReminder
   );
+
   const deleteReminder = useContextSelector(
     projectContext,
     (project) => project.deleteReminder
@@ -317,12 +320,6 @@ function CardContentContainer(props) {
   };
 
   const generateContent = () => {
-    // itemsRef.current.map((ref, index) => {
-    //   ref.visibility = "hidden";
-    // });
-
-    // itemsRef.current.forEach((el) => (el.visibility = "hidden"));
-
     if (props.type === "note") {
       return (
         <Typography>
