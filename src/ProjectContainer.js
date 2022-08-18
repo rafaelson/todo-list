@@ -13,8 +13,15 @@ import {
   Input,
   Menu,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  FormControl,
 } from "@mui/material";
 import { Box } from "@mui/system";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Fragment, useState } from "react";
 import { useContextSelector } from "use-context-selector";
 import {
@@ -33,8 +40,99 @@ import uniqid from "uniqid";
 import { projectContext } from "./App";
 import { useRef } from "react";
 import { useEffect } from "react";
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { format, parseISO } from "date-fns";
+
+function AddReminderForm(props) {
+  const [value, setValue] = useState(new Date());
+  const current = useContextSelector(
+    projectContext,
+    (project) => project.current
+  );
+  const addCard = useContextSelector(
+    projectContext,
+    (project) => project.addCard
+  );
+  const setReminder = useContextSelector(
+    projectContext,
+    (project) => project.setReminder
+  );
+  const deleteReminder = useContextSelector(
+    projectContext,
+    (project) => project.deleteReminder
+  );
+
+  const handleChange = (event) => {
+    setValue(event.target.value);
+  };
+
+  const setOrEdit = () => {
+    if (props.reminderExists) return "Edit reminder";
+    else return "Set reminder";
+  };
+
+  const showDelete = () => {
+    if (props.reminderExists)
+      return (
+        <Button
+          onClick={() => {
+            deleteReminder(current, props.id);
+            props.checkReminder();
+            props.handleClose();
+          }}
+        >
+          Delete
+        </Button>
+      );
+  };
+
+  return (
+    <Dialog open={props.open} onClose={props.handleClose}>
+      <DialogTitle>{setOrEdit()}</DialogTitle>
+      <DialogContent sx={{ paddingTop: "5px !important" }}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DateTimePicker
+            renderInput={(props) => <TextField {...props} />}
+            label="Date"
+            value={value}
+            inputFormat="dd/MM H:mm"
+            onChange={(newValue) => {
+              setValue(newValue);
+            }}
+            ampm={false}
+          />
+        </LocalizationProvider>
+      </DialogContent>
+      <DialogActions>
+        {showDelete()}
+        <Button onClick={props.handleClose}>Cancel</Button>
+        <Button
+          onClick={() => {
+            if (value) {
+              setReminder(current, props.id, value.toISOString());
+              props.handleClose();
+            }
+          }}
+        >
+          Set
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 function CardOptionsMenu(props) {
+  const [open, setOpen] = useState(false);
+  const [reminderExists, setReminderExistence] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   const deleteCard = useContextSelector(
     projectContext,
     (project) => project.deleteCard
@@ -44,6 +142,18 @@ function CardOptionsMenu(props) {
     projectContext,
     (project) => project.current
   );
+
+  const checkIfReminderExists = (() => {
+    if (props.reminder && reminderExists != true) setReminderExistence(true);
+    else if (props.reminder === undefined && reminderExists !== false)
+      setReminderExistence(false);
+  })();
+
+  const defineIfItsSetOrEditReminder = () => {
+    if (reminderExists) {
+      return "Edit Reminder";
+    } else return "Set Reminder";
+  };
 
   return (
     <Fragment>
@@ -58,10 +168,11 @@ function CardOptionsMenu(props) {
       >
         <MenuItem
           onClick={() => {
+            handleClickOpen();
             props.handleClose();
           }}
         >
-          <AddAlertOutlined /> Set Reminder
+          <AddAlertOutlined /> {defineIfItsSetOrEditReminder()}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -72,12 +183,21 @@ function CardOptionsMenu(props) {
           <DeleteOutline /> Delete
         </MenuItem>
       </Menu>
+      <AddReminderForm
+        open={open}
+        handleClose={handleClose}
+        id={props.id}
+        reminderExists={reminderExists}
+        checkReminder={props.checkReminder}
+      />
     </Fragment>
   );
 }
 
 function CardInfo(props) {
   const [anchorEl, setAnchorEl] = useState(false);
+  const [reminderIsVisible, setReminderVisibility] = useState("hidden");
+  const [reminder, setReminder] = useState();
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
@@ -86,6 +206,25 @@ function CardInfo(props) {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const checkReminder = () => {
+    if (props.reminder && props.reminder !== reminder) {
+      setReminderVisibility("visible");
+      setReminder(props.reminder);
+    } else if (
+      props.reminder === undefined &&
+      reminderIsVisible === "visible"
+    ) {
+      setReminderVisibility("hidden");
+    }
+  };
+
+  const checkDate = (date) => {
+    let dateIsValid = !Number.isNaN(new Date(date).getTime());
+    if (dateIsValid) {
+      return format(parseISO(date), "d MMM, HH:mm");
+    }
   };
 
   return (
@@ -97,12 +236,13 @@ function CardInfo(props) {
         minWidth: "100%",
       }}
     >
+      {checkReminder()}
       <Chip
         icon={<AccessTime />}
-        label={"04 jun, 9:30"}
+        label={checkDate(reminder)}
         size="small"
         variant="outlined"
-        sx={{ marginBottom: 1, marginLeft: 1 }}
+        sx={{ marginBottom: 1, marginLeft: 1, visibility: reminderIsVisible }}
       />
       <IconButton
         onClick={handleClick}
@@ -115,6 +255,8 @@ function CardInfo(props) {
         open={open}
         anchorEl={anchorEl}
         id={props.id}
+        reminder={props.reminder}
+        checkReminder={checkReminder}
       />
     </Box>
   );
@@ -301,7 +443,7 @@ function CardContentContainer(props) {
       <CardContent sx={{ minWidth: "87.5%", overflowY: "auto" }}>
         {generateContent()}
       </CardContent>
-      <CardInfo id={props.id} />
+      <CardInfo id={props.id} reminder={props.reminder} />
     </Fragment>
   );
 }
@@ -323,6 +465,7 @@ function GenericCard(props) {
       <CardContentContainer
         id={props.id}
         content={props.card.content}
+        reminder={props.card.reminder}
         type={props.card.type}
       />
     </Card>

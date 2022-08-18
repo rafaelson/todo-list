@@ -53,6 +53,7 @@ class AppContainer extends React.Component {
     let card = {
       content: undefined,
       type: type,
+      reminder: undefined,
       key: uniqid(),
     };
     if (type === "checklist") {
@@ -111,6 +112,18 @@ class AppContainer extends React.Component {
     }
   }
 
+  setReminder(id, cardId, content) {
+    let newState = cloneDeep(this.state.projects);
+    newState[id].cards[cardId].reminder = content;
+    this.setState({ projects: newState });
+  }
+
+  deleteReminder(id, cardId) {
+    let newState = cloneDeep(this.state.projects);
+    newState[id].cards[cardId].reminder = undefined;
+    this.setState({ projects: newState });
+  }
+
   render() {
     return (
       <Box sx={{ display: "flex", flexDirection: "row" }}>
@@ -120,6 +133,9 @@ class AppContainer extends React.Component {
             rename: (id, name) => this.renameProject(id, name),
             delete: (id) => this.deleteProject(id),
             setCurrent: (id) => this.setState({ currentProject: Number(id) }),
+            setReminder: (id, cardId, content) =>
+              this.setReminder(id, cardId, content),
+            deleteReminder: (id, cardId) => this.deleteReminder(id, cardId),
             addCard: (id, card) => this.addCard(id, card),
             deleteCard: (id, cardId) => this.deleteCard(id, cardId),
             updateCard: (id, cardId, content, type, checkboxId) =>
